@@ -328,14 +328,14 @@ make test
 
 **P2** — ¿Qué hace `s + 1`? ¿Por qué avanza al siguiente carácter y no al siguiente byte?
 
-> R:
+> R: Mueve el puntero una posición hacia adelante, o sea que pasa a apuntar a la letra siguiente. No copia ni cambia el string: es mirar el mismo string pero empezando desde la letra de al lado. Por eso, en la recursión, cada llamada ve el string con una letra menos.
 
 **P3** — Si llamaras a `GetLength(NULL)`, ¿qué pasaría? ¿Por qué las precondiciones del contrato dicen `s != NULL`?
 
-> R:
+> R: NULL es un puntero que no apunta a nada. GetLength llama a IsEmpty, que hace *s, o sea intenta leer la letra de "ningún lugar". Eso es un error: en C se llama comportamiento indefinido, y en la práctica el programa se cierra de golpe. La función no chequea si le pasaron NULL
 
 ```
-GETLENGTH_PASA=
+GETLENGTH_PASA=SI
 ```
 _(escribí SI cuando todos los tests de GetLength pasen)_
 
@@ -367,7 +367,7 @@ El `while` termina cuando alguna de las dos cadenas llega a `'\0'`. Después dev
 
 **P4** — ¿Qué dos casos están mal cubiertos por `return 1`? Describí un ejemplo para cada uno.
 
-> R:
+> R:pide los dos casos que el bug maneja mal, con un ejemplo de cada uno. Son justo los dos tests de StringTest.c. El primero es más largo que el segundo: AreEqual("abc", "ab") devolvía 1 y tiene que dar 0. El segundo es más largo que el primero: AreEqual("ab", "abc") devolvía 1 y tiene que dar 0.
 
 #### Corrección
 
@@ -384,7 +384,7 @@ make test
 ```
 
 ```
-AREEQUAL_PASA=
+AREEQUAL_PASA=SI
 ```
 _(escribí SI cuando todos los tests de AreEqual pasen)_
 
@@ -414,7 +414,7 @@ int AreDecimalDigits(const char *s) {
 
 **P5** — ¿Por qué la cadena vacía no debería considerarse un conjunto de dígitos decimales? Pensalo desde la especificación matemática.
 
-> R:
+> R:Porque una cadena vacía no tiene ningún dígito, así que no representa ningún número. Si AreDecimalDigits devolviera 1 para "", se aceptaría como número válido algo que no tiene nada para convertir. Por eso la especificación pide que devuelva 0: para ser un número tiene que haber al menos un dígito
 
 #### Corrección
 
@@ -425,7 +425,7 @@ make test
 ```
 
 ```
-AREDECIMALDIGITS_PASA=
+AREDECIMALDIGITS_PASA=SI
 ```
 _(escribí SI cuando todos los tests de AreDecimalDigits pasen)_
 
@@ -452,7 +452,7 @@ make test
 ```
 
 ```
-CONTAINS_PASA=
+CONTAINS_PASA=SI
 ```
 _(escribí SI cuando todos los tests de Contains pasen)_
 
@@ -467,7 +467,7 @@ Antes de implementar, discutí con tu equipo:
 
 **P6** — Conclusión de la discusión:
 
-> R:
+> R:Conviene ponerlo en un módulo aparte, Conversion. String tiene funciones que trabajan sobre cadenas y responden algo sobre ellas como el largo, igualdad, y si contiene un carácter, mientras que ToInteger transforma una cadena en otro tipo de dato, un entero, que es una responsabilidad distinta. Separarlo mantiene a String enfocado en cadenas y hace que un programa que solo las necesita no dependa de las conversiones. Además, Conversion puede usar String, pero String no necesita a Conversion
 
 ---
 
@@ -494,7 +494,7 @@ int ToInteger(const char *s) {
 
 **P7** — El loop acumula correctamente el valor en `resultado`. ¿Qué está mal en el `return`?
 
-> R:
+> R:El ciclo calcula bien el número en la variable resultado, pero el return devuelve solo signo, que vale 1 o -1. Entonces se pierde el número calculado: ToInteger("42") devuelve 1 y ToInteger("-7") devuelve -1. Hay que devolver el resultado con el signo aplicado: return signo * resultado;
 
 #### Corrección
 
@@ -506,10 +506,10 @@ make test
 
 **P8** — La expresión `*s - '0'` convierte un carácter dígito al entero correspondiente. ¿Por qué funciona? ¿Qué devuelve `'3' - '0'`?
 
-> R:
+> R:En C los caracteres se guardan como números (sus códigos), y los dígitos '0' a '9' tienen códigos consecutivos. Al restarle el código de '0' al de un dígito, queda la distancia entre ellos, que es justamente el valor del dígito. Por ejemplo, '3' - '0' da el entero 3.
 
 ```
-TOINTEGER_PASA=
+TOINTEGER_PASA=SI
 ```
 _(escribí SI cuando todos los tests de ToInteger pasen)_
 
@@ -562,7 +562,7 @@ foo
 
 **P9** — ¿Por qué `(void)argc` suprime un warning? ¿Cuándo sería necesario usar `argc`?
 
-> R:
+> R:(void)argc le indica al compilador que argc no se usa a propósito, para que no muestre la advertencia de parámetro sin usar. En enlineas no hace falta porque el for recorre argv con un puntero y se corta solo al llegar al NULL del final. argc sería necesario cuando hay que saber cuántos argumentos hay antes de recorrerlos, por ejemplo para verificar que se pasó al menos uno (como hace mayorlongitud con if (argc < 2)), o para recorrer con un índice desde 1 hasta argc
 
 ---
 
@@ -589,7 +589,7 @@ Salida esperada:
 ```
 
 ```
-LONGITUDES_PASA=
+LONGITUDES_PASA=SI
 ```
 _(SI o NO)_
 
@@ -616,7 +616,7 @@ make mayorlongitud
 ```
 
 ```
-MAYORLONGITUD_PASA=
+MAYORLONGITUD_PASA=SI
 ```
 _(SI o NO)_
 
@@ -635,7 +635,7 @@ make todosiguales
 ```
 
 ```
-TODOSIGUALES_PASA=
+TODOSIGUALES_PASA=SI
 ```
 _(SI o NO)_
 
@@ -652,7 +652,7 @@ make suma
 ```
 
 ```
-SUMA_PASA=
+SUMA_PASA=SI
 ```
 _(SI o NO)_
 
@@ -662,15 +662,15 @@ _(SI o NO)_
 
 **P10** — `GetLength` es recursiva pero en C una llamada recursiva consume un stack frame. Si llamaras `GetLength` con un string de 1.000.000 de caracteres, ¿qué pasaría? ¿Cómo lo resolverías?
 
-> R:
+> R:Cada llamada recursiva ocupa un espacio en la pila (stack) hasta que termina, y como GetLength suma 1 después de la llamada, las llamadas no terminan hasta llegar al final de la cadena. Con 1.000.000 de caracteres habría un millón de llamadas anidadas, lo que probablemente desborde la pila (stack overflow) y el programa se cierre. Se resuelve con una versión iterativa: un ciclo que recorre la cadena con un puntero y va sumando 1 en un contador, que no hace crecer la pila
 
 **P11** — En la Parte III, todos los programas usan `char **arg` para iterar en vez de un índice entero. ¿Qué ventaja tiene este estilo? ¿Cuándo sería preferible usar el índice?
 
-> R:
+> R:Iterar con un puntero (char **arg) no necesita argc ni una variable índice: el ciclo se corta solo al encontrar el NULL que marca el final de argv, igual que con el '\0' en las cadenas, y hay menos riesgo de pasarse o quedarse corto con los índices. Un índice es preferible cuando se necesita la posición del elemento (por ejemplo, para mostrar "argumento 2"), cuando hay que acceder directamente a una posición determinada o recorrer en otro orden, o cuando la lista no termina con NULL y solo se conoce la cantidad de elementos
 
 **P12** — En C, `"hola"` es un literal de tipo `const char *`. Si intentaras modificar un carácter con `s[0] = 'H'`, el comportamiento es indefinido. ¿Por qué? ¿En qué parte de la memoria viven los literales?
 
-> R:
+> R:Los literales de cadena como "hola" se guardan en una zona de memoria de solo lectura del programa, y el estándar de C dice que modificarlos es comportamiento indefinido: el programa puede cerrarse con un error o comportarse de forma inesperada (por ejemplo, el compilador puede compartir el mismo literal entre varias partes del código). Si se necesita modificar la cadena, hay que copiarla a un arreglo, por ejemplo char s[] = "hola";, que sí se puede modificar
 
 ---
 
